@@ -1,0 +1,92 @@
+
+
+
+
+a fooball group application
+
+- users login with email and password, 
+- must have phone number, 
+- phone number otp verification for registration
+- users can reset password via phone number otp verification
+- user table -
+  - id
+  - email
+  - password (bcrypt encrypted)
+  - phone number
+  - created_at
+  - updated_at
+  - role (user/admin)
+  - status (active/inactive)
+  - wins 
+  - losses
+  - draws
+
+
+Poll feature
+- admins can create polls
+- users can vote in polls
+- poll table -
+  - id
+  - question
+  - options [
+    {id, text}
+  ]
+  - created_by (admin id)
+  - created_at
+  - valid_until
+  - updated_at
+  - votes [{
+    - optionid
+    - [userid]
+  }]
+  - displayAfterClosed (boolean) (this will decide whether to display poll results after the poll is closed)
+
+
+Game: 
+- players
+- date 
+- time from
+- time to
+- location
+- team1
+- team2
+- score (team1 vs team2)
+
+
+
+UI will have a user tab, polls tab, games tab, stats tab
+
+user tab
+- view profile
+- edit profile
+- view match history (matchId hyperlink takes to games tab)
+
+
+Polls tab
+- active polls
+- allow user to vote only once and lock their vote after submission
+- display poll results after a player has voted or when the poll is closed (depending on the displayAfterClosed flag)
+- past polls
+
+
+games tab
+- upcoming games
+- past games
+- in games tab, admin can create games, edit games
+- the game creation UI should display a list of players to select from
+- after the players for a game are selected, then the teams can be selected by clicking on the players - toggling their colours to blue or white
+- 
+
+stats tab
+- user list with no of wins, losses, draws
+- allow sorting by wins, losses, draws
+
+
+
+create two folders FE and BE
+- FE will contain the frontend code
+- BE will contain the backend code
+- create 2 backends - one Java Spring Boot and one Node.js (Express)
+- the frontend should be able to switch between the two backends seamlessly
+- setup and use a local dynamodb
+- clarify any ambiguities or requirements before implementation

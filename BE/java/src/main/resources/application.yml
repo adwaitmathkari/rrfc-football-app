@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: football-api
+  config:
+    # Shares BE/.env with the Node backend (run from BE/java)
+    import: optional:file:../.env[.properties]
+
+server:
+  port: ${JAVA_PORT:8080}
+
+app:
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET}
+    refresh-secret: ${JWT_REFRESH_SECRET}
+    access-ttl-minutes: ${ACCESS_TOKEN_TTL_MINUTES:15}
+    refresh-ttl-days: ${REFRESH_TOKEN_TTL_DAYS:7}
+  cors-origin: ${CORS_ORIGIN:http://localhost:5173}
+  cookie-secure: ${COOKIE_SECURE:false}
+  dynamo:
+    endpoint: ${DYNAMODB_ENDPOINT:}
+    region: ${AWS_REGION:ap-south-1}
+    table-prefix: ${TABLE_PREFIX:football_}
+    access-key-id: ${AWS_ACCESS_KEY_ID:}
+    secret-access-key: ${AWS_SECRET_ACCESS_KEY:}

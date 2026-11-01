@@ -1,0 +1,43 @@
+name: football
+
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    working_dir: /home/dynamodblocal
+    # Root avoids permission errors when writing to the named volume
+    user: root
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
+
+  dynamodb-init:
+    image: amazon/aws-cli:latest
+    depends_on:
+      - dynamodb-local
+    entrypoint: ["/bin/sh", "/scripts/create-tables.sh"]
+    environment:
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      AWS_DEFAULT_REGION: ap-south-1
+      AWS_PAGER: ""
+      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
+      TABLE_PREFIX: ${TABLE_PREFIX:-football_}
+    volumes:
+      - ./dynamodb:/scripts:ro
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    depends_on:
+      - dynamodb-local
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: http://dynamodb-local:8000
+      AWS_REGION: ap-south-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+
+volumes:
+  dynamodb-data:
