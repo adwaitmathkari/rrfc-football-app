@@ -1,6 +1,5 @@
 import LogoutIcon from '@mui/icons-material/Logout';
-import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import { AppBar, Container, IconButton, Tab, Tabs, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Container, IconButton, Tab, Tabs, Toolbar, Tooltip, Typography } from '@mui/material';
 import { Link as RouterLink, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { ChangePasswordDialog } from './ChangePasswordDialog';
@@ -22,9 +21,14 @@ export function AppShell() {
     <>
       <AppBar position="sticky">
         <Toolbar sx={{ gap: 2 }}>
-          <SportsSoccerIcon />
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Football Group
+          <Box
+            component="img"
+            src="/logo.jpg"
+            alt=""
+            sx={{ height: 44, bgcolor: '#fff', borderRadius: 1, p: 0.25 }}
+          />
+          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}>
+            RRFC
           </Typography>
           {user && (
             <>
@@ -38,7 +42,7 @@ export function AppShell() {
           )}
         </Toolbar>
         {user && (
-          <Tabs value={currentTab} variant="fullWidth" textColor="inherit" indicatorColor="secondary">
+          <Tabs value={currentTab} variant="fullWidth" textColor="inherit" indicatorColor="primary">
             {TABS.map((t) => (
               <Tab key={t.path} label={t.label} value={t.path} component={RouterLink} to={t.path} />
             ))}

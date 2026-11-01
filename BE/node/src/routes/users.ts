@@ -37,7 +37,7 @@ usersRouter.post('/me/password', async (req, res) => {
   const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
   const user = await findUserById(currentUser(req).userId);
   if (!user) throw new HttpError(404, 'User not found');
-  if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
+  if (!user.passwordHash || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
     throw new HttpError(400, 'Current password is incorrect');
   }
   await updatePassword(user.id, await bcrypt.hash(newPassword, BCRYPT_ROUNDS), false);

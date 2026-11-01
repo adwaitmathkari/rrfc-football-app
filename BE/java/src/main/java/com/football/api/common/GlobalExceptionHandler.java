@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("Admin access required"));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("You do not have permission to do this"));
     }
 
     @ExceptionHandler(Exception.class)

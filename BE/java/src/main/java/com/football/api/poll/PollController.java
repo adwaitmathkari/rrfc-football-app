@@ -49,7 +49,7 @@ public class PollController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
     public PollDto create(@AuthenticationPrincipal AuthUser me, @Valid @RequestBody CreatePollRequest body) {
         return pollService.create(body, me.userId());
     }

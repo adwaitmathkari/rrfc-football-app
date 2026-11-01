@@ -1,8 +1,8 @@
-// Creates the first admin from ADMIN_* values in BE/.env. Safe to run more than once.
+// Creates the super admin from ADMIN_* values in BE/.env, or promotes that user if they already exist.
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import '../src/config.js';
-import { createUser, findUserByEmail } from '../src/repositories/users.js';
+import { createUser, findUserByEmail, updateRole } from '../src/repositories/users.js';
 import { BCRYPT_ROUNDS } from '../src/routes/auth.js';
 import { nowIso } from '../src/time.js';
 import { registerSchema } from '../src/validation.js';
@@ -15,8 +15,11 @@ const input = registerSchema.parse({
 });
 
 const existing = await findUserByEmail(input.email);
-if (existing) {
-  console.log(`User ${input.email} already exists (role: ${existing.role}). Nothing to do.`);
+if (existing?.role === 'superadmin') {
+  console.log(`${input.email} is already a super admin. Nothing to do.`);
+} else if (existing) {
+  await updateRole(existing.id, 'superadmin');
+  console.log(`${input.email} promoted from ${existing.role} to superadmin.`);
 } else {
   const now = nowIso();
   await createUser({
@@ -25,7 +28,7 @@ if (existing) {
     email: input.email,
     passwordHash: await bcrypt.hash(input.password, BCRYPT_ROUNDS),
     phone: input.phone,
-    role: 'admin',
+    role: 'superadmin',
     status: 'active',
     wins: 0,
     losses: 0,
@@ -34,5 +37,5 @@ if (existing) {
     createdAt: now,
     updatedAt: now,
   });
-  console.log(`Admin ${input.email} created.`);
+  console.log(`Super admin ${input.email} created.`);
 }

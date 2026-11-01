@@ -159,7 +159,7 @@ export function GameFormDialog({ game, users, onClose, onSaved }: Props) {
                         <ListItemIcon>
                           <Checkbox edge="start" checked={selected.includes(u.id)} tabIndex={-1} disableRipple />
                         </ListItemIcon>
-                        <ListItemText primary={u.name} />
+                        <ListItemText primary={u.name} secondary={u.guest ? 'Guest' : undefined} />
                       </ListItemButton>
                     ))}
                   </List>

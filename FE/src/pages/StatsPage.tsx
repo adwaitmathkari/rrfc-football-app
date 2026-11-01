@@ -1,5 +1,6 @@
 import {
   Alert,
+  Chip,
   CircularProgress,
   Paper,
   Table,
@@ -77,7 +78,10 @@ export function StatsPage() {
             {rows.map((u, i) => (
               <TableRow key={u.id} selected={u.id === user?.id}>
                 <TableCell>{i + 1}</TableCell>
-                <TableCell>{u.name}</TableCell>
+                <TableCell>
+                  {u.name}
+                  {u.guest && <Chip size="small" variant="outlined" label="Guest" sx={{ ml: 1 }} />}
+                </TableCell>
                 <TableCell align="right">{u.wins + u.losses + u.draws}</TableCell>
                 <TableCell align="right">{u.wins}</TableCell>
                 <TableCell align="right">{u.losses}</TableCell>

@@ -8,6 +8,7 @@ import { GameCard } from '../components/GameCard';
 import { GameFormDialog } from '../components/GameFormDialog';
 import { useAuth } from '../context/AuthContext';
 import { useLoad, useUsers } from '../hooks/useLoad';
+import { isAdmin } from '../utils/roles';
 
 const loadUpcoming = () => api.games('upcoming');
 const loadPast = () => api.games('past');
@@ -20,7 +21,7 @@ export function GamesPage() {
   const past = useLoad(loadPast);
   // null = closed, undefined game = creating
   const [editing, setEditing] = useState<{ game?: Game } | null>(null);
-  const isAdmin = user?.role === 'admin';
+  const canManage = isAdmin(user);
 
   const onSaved = () => {
     setEditing(null);
@@ -40,7 +41,7 @@ export function GamesPage() {
             game={game}
             nameOf={nameOf}
             highlighted={game.id === gameId}
-            onEdit={isAdmin ? () => setEditing({ game }) : undefined}
+            onEdit={canManage ? () => setEditing({ game }) : undefined}
           />
         ))}
       </Stack>
@@ -52,7 +53,7 @@ export function GamesPage() {
       <Box>
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h5">Upcoming games</Typography>
-          {isAdmin && (
+          {canManage && (
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing({})}>
               New game
             </Button>

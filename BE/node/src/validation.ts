@@ -25,6 +25,11 @@ export const loginSchema = z.object({
 
 export const updateProfileSchema = z.object({ name: nameSchema });
 
+export const createGuestSchema = z.object({ name: nameSchema });
+
+// superadmin is only assigned via the seed script, never through the API
+export const updateRoleSchema = z.object({ role: z.enum(['user', 'admin']) });
+
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),
   newPassword: passwordSchema,

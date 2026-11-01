@@ -7,6 +7,7 @@ import { CreatePollDialog } from '../components/CreatePollDialog';
 import { PollCard } from '../components/PollCard';
 import { useAuth } from '../context/AuthContext';
 import { useLoad, useUsers } from '../hooks/useLoad';
+import { isAdmin } from '../utils/roles';
 
 const loadActive = () => api.polls('active');
 const loadClosed = () => api.polls('closed');
@@ -26,7 +27,7 @@ export function PollsPage() {
       <Box>
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h5">Active polls</Typography>
-          {user?.role === 'admin' && (
+          {isAdmin(user) && (
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreating(true)}>
               New poll
             </Button>

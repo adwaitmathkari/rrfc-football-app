@@ -115,15 +115,34 @@ public class UserRepository {
                         ":now", s(Times.nowIso()))));
     }
 
+    public User updateRole(String id, String role) {
+        var response = db.updateItem(r -> r.tableName(table)
+                .key(key(id))
+                .updateExpression("SET #role = :role, updatedAt = :now")
+                .conditionExpression("attribute_exists(id)")
+                .expressionAttributeNames(Map.of("#role", "role"))
+                .expressionAttributeValues(Map.of(":role", s(role), ":now", s(Times.nowIso())))
+                .returnValues(ReturnValue.ALL_NEW));
+        return fromItem(response.attributes());
+    }
+
     static Map<String, AttributeValue> toItem(User u) {
         Map<String, AttributeValue> item = new HashMap<>();
         item.put("id", s(u.id()));
         item.put("name", s(u.name()));
-        item.put("email", s(u.email()));
-        item.put("passwordHash", s(u.passwordHash()));
-        item.put("phone", s(u.phone()));
+        // Omitted for guests; items without email/phone are simply left out of the GSIs
+        if (u.email() != null) {
+            item.put("email", s(u.email()));
+        }
+        if (u.passwordHash() != null) {
+            item.put("passwordHash", s(u.passwordHash()));
+        }
+        if (u.phone() != null) {
+            item.put("phone", s(u.phone()));
+        }
         item.put("role", s(u.role()));
         item.put("status", s(u.status()));
+        item.put("guest", bool(u.guest()));
         item.put("wins", n(u.wins()));
         item.put("losses", n(u.losses()));
         item.put("draws", n(u.draws()));
@@ -142,6 +161,7 @@ public class UserRepository {
                 getString(item, "phone"),
                 getString(item, "role"),
                 getString(item, "status"),
+                getBoolean(item, "guest"),
                 getLong(item, "wins"),
                 getLong(item, "losses"),
                 getLong(item, "draws"),

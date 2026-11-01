@@ -1,13 +1,17 @@
-export type Role = 'user' | 'admin';
+export type Role = 'user' | 'admin' | 'superadmin';
 export type UserStatus = 'active' | 'inactive';
 
 export interface User {
   id: string;
   name: string;
-  email: string;
-  phone: string;
+  /** null for guest players */
+  email: string | null;
+  /** null for guest players */
+  phone: string | null;
   role: Role;
   status: UserStatus;
+  /** Guest players are added by admins and can't log in */
+  guest: boolean;
   wins: number;
   losses: number;
   draws: number;
@@ -20,6 +24,7 @@ export interface PublicUser {
   id: string;
   name: string;
   status: UserStatus;
+  guest: boolean;
   wins: number;
   losses: number;
   draws: number;

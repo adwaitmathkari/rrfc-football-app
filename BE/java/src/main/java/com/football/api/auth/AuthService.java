@@ -44,7 +44,7 @@ public class AuthService {
 
         String now = Times.nowIso();
         User user = new User(UUID.randomUUID().toString(), req.name().trim(), email,
-                passwordEncoder.encode(req.password()), phone, User.ROLE_USER, User.STATUS_ACTIVE,
+                passwordEncoder.encode(req.password()), phone, User.ROLE_USER, User.STATUS_ACTIVE, false,
                 0, 0, 0, false, now, now);
         users.create(user);
         return user;

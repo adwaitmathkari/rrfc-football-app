@@ -1,6 +1,9 @@
 package com.football.api.user;
 
-/** A row in the users table. Stored with the same attribute names as the Node backend. */
+/**
+ * A row in the users table. Stored with the same attribute names as the Node backend.
+ * Guest players have no email, phone or password and can't log in.
+ */
 public record User(
         String id,
         String name,
@@ -9,6 +12,7 @@ public record User(
         String phone,
         String role,
         String status,
+        boolean guest,
         long wins,
         long losses,
         long draws,
@@ -18,6 +22,7 @@ public record User(
 
     public static final String ROLE_USER = "user";
     public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_SUPERADMIN = "superadmin";
     public static final String STATUS_ACTIVE = "active";
 
     public boolean isActive() {

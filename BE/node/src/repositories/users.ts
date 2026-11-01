@@ -9,17 +9,19 @@ import {
 import { db, scanAll, tables } from '../db.js';
 import { nowIso } from '../time.js';
 
-export type Role = 'user' | 'admin';
+export type Role = 'user' | 'admin' | 'superadmin';
 export type UserStatus = 'active' | 'inactive';
 
 export interface User {
   id: string;
   name: string;
-  email: string;
-  passwordHash: string;
-  phone: string;
+  // email, phone and passwordHash are absent for guest players, who can't log in
+  email?: string;
+  passwordHash?: string;
+  phone?: string;
   role: Role;
   status: UserStatus;
+  guest?: boolean;
   wins: number;
   losses: number;
   draws: number;
@@ -109,13 +111,29 @@ export async function updatePassword(id: string, passwordHash: string, mustChang
   );
 }
 
+export async function updateRole(id: string, role: Role): Promise<User> {
+  const res = await db.send(
+    new UpdateCommand({
+      TableName: tables.users,
+      Key: { id },
+      UpdateExpression: 'SET #role = :role, updatedAt = :now',
+      ConditionExpression: 'attribute_exists(id)',
+      ExpressionAttributeNames: { '#role': 'role' },
+      ExpressionAttributeValues: { ':role': role, ':now': nowIso() },
+      ReturnValues: 'ALL_NEW',
+    }),
+  );
+  return res.Attributes as User;
+}
+
 export const toSelfDto = (u: User) => ({
   id: u.id,
   name: u.name,
-  email: u.email,
-  phone: u.phone,
+  email: u.email ?? null,
+  phone: u.phone ?? null,
   role: u.role,
   status: u.status,
+  guest: u.guest ?? false,
   wins: u.wins,
   losses: u.losses,
   draws: u.draws,
@@ -128,6 +146,7 @@ export const toPublicDto = (u: User) => ({
   id: u.id,
   name: u.name,
   status: u.status,
+  guest: u.guest ?? false,
   wins: u.wins,
   losses: u.losses,
   draws: u.draws,

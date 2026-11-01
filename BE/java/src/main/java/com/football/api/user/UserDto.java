@@ -8,6 +8,7 @@ public record UserDto(
         String phone,
         String role,
         String status,
+        boolean guest,
         long wins,
         long losses,
         long draws,
@@ -16,7 +17,7 @@ public record UserDto(
         String updatedAt) {
 
     public static UserDto from(User u) {
-        return new UserDto(u.id(), u.name(), u.email(), u.phone(), u.role(), u.status(), u.wins(), u.losses(),
-                u.draws(), u.mustChangePassword(), u.createdAt(), u.updatedAt());
+        return new UserDto(u.id(), u.name(), u.email(), u.phone(), u.role(), u.status(), u.guest(), u.wins(),
+                u.losses(), u.draws(), u.mustChangePassword(), u.createdAt(), u.updatedAt());
     }
 }

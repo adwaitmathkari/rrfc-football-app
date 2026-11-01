@@ -64,13 +64,13 @@ public class GameController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
     public GameDto create(@AuthenticationPrincipal AuthUser me, @Valid @RequestBody GameRequest body) {
         return gameService.create(body, me.userId());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
     public GameDto update(@PathVariable String id, @Valid @RequestBody GameRequest body) {
         return gameService.update(id, body);
     }

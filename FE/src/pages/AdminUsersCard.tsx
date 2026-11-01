@@ -1,4 +1,5 @@
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {
   Alert,
   Button,
@@ -19,41 +20,60 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { api } from '../api/endpoints';
 import type { User } from '../api/types';
+import { useAuth } from '../context/AuthContext';
 import { useLoad } from '../hooks/useLoad';
 import { errorMessage } from '../utils/format';
+import { isSuperAdmin } from '../utils/roles';
 
-/** Admin-only list of users with password reset. Roles/status are changed directly in the DB. */
+/** User list for admins. Only a super admin can reset passwords and grant/revoke admin. */
 export function AdminUsersCard() {
-  const { data: users, error, loading } = useLoad(api.adminUsers);
+  const { user: me } = useAuth();
+  const superAdmin = isSuperAdmin(me);
+  const { data: users, error, loading, reload } = useLoad(api.adminUsers);
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
   const [result, setResult] = useState<{ user: User; password: string } | null>(null);
-  const [resetError, setResetError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [addingGuest, setAddingGuest] = useState(false);
 
   const reset = async (user: User) => {
     setConfirmUser(null);
-    setResetError(null);
+    setActionError(null);
     try {
       const { temporaryPassword } = await api.resetPassword(user.id);
       setResult({ user, password: temporaryPassword });
     } catch (err) {
-      setResetError(errorMessage(err));
+      setActionError(errorMessage(err));
+    }
+  };
+
+  const toggleAdmin = async (user: User) => {
+    setActionError(null);
+    try {
+      await api.updateRole(user.id, user.role === 'admin' ? 'user' : 'admin');
+      await reload();
+    } catch (err) {
+      setActionError(errorMessage(err));
     }
   };
 
   return (
     <Card>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Manage users
-        </Typography>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="h6">Manage users</Typography>
+          <Button variant="outlined" startIcon={<PersonAddIcon />} onClick={() => setAddingGuest(true)}>
+            Add guest player
+          </Button>
+        </Stack>
         {loading && <CircularProgress size={24} />}
-        {(error || resetError) && <Alert severity="error">{error ?? resetError}</Alert>}
+        {(error || actionError) && <Alert severity="error">{error ?? actionError}</Alert>}
         {users && (
           <TableContainer>
             <Table size="small">
@@ -70,17 +90,29 @@ export function AdminUsersCard() {
               <TableBody>
                 {users.map((u) => (
                   <TableRow key={u.id}>
-                    <TableCell>{u.name}</TableCell>
-                    <TableCell>{u.email}</TableCell>
-                    <TableCell>{u.phone}</TableCell>
-                    <TableCell>{u.role}</TableCell>
+                    <TableCell>
+                      {u.name}
+                      {u.guest && <Chip size="small" variant="outlined" label="Guest" sx={{ ml: 1 }} />}
+                    </TableCell>
+                    <TableCell>{u.email ?? '—'}</TableCell>
+                    <TableCell>{u.phone ?? '—'}</TableCell>
+                    <TableCell>
+                      {u.role}
+                      {superAdmin && !u.guest && u.role !== 'superadmin' && u.id !== me?.id && (
+                        <Button size="small" sx={{ ml: 1 }} onClick={() => void toggleAdmin(u)}>
+                          {u.role === 'admin' ? 'Remove admin' : 'Make admin'}
+                        </Button>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Chip size="small" label={u.status} color={u.status === 'active' ? 'success' : 'default'} />
                     </TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => setConfirmUser(u)}>
-                        Reset password
-                      </Button>
+                      {superAdmin && !u.guest && (
+                        <Button size="small" onClick={() => setConfirmUser(u)}>
+                          Reset password
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -124,6 +156,66 @@ export function AdminUsersCard() {
           <Button onClick={() => setResult(null)}>Done</Button>
         </DialogActions>
       </Dialog>
+
+      <AddGuestDialog
+        open={addingGuest}
+        onClose={() => setAddingGuest(false)}
+        onCreated={() => {
+          setAddingGuest(false);
+          void reload();
+        }}
+      />
     </Card>
+  );
+}
+
+function AddGuestDialog({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+  const [name, setName] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await api.createGuest(name.trim());
+      setName('');
+      onCreated();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+      <form onSubmit={submit}>
+        <DialogTitle>Add guest player</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <DialogContentText>
+              Guests can be picked for games and appear in stats, but they can't log in.
+            </DialogContentText>
+            {error && <Alert severity="error">{error}</Alert>}
+            <TextField
+              label="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              slotProps={{ htmlInput: { maxLength: 50 } }}
+              required
+              autoFocus
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={saving || !name.trim()}>
+            Add
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }

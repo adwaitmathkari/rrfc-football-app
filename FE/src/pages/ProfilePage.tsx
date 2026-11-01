@@ -28,6 +28,7 @@ import { TeamChip } from '../components/TeamChip';
 import { useAuth } from '../context/AuthContext';
 import { useLoad } from '../hooks/useLoad';
 import { errorMessage, formatDate, outcomeFor, teamOf } from '../utils/format';
+import { isAdmin } from '../utils/roles';
 import { AdminUsersCard } from './AdminUsersCard';
 
 export function ProfilePage() {
@@ -37,7 +38,7 @@ export function ProfilePage() {
     <Stack spacing={3}>
       <ProfileCard user={user} />
       <MatchHistory userId={user.id} />
-      {user.role === 'admin' && <AdminUsersCard />}
+      {isAdmin(user) && <AdminUsersCard />}
     </Stack>
   );
 }
@@ -102,7 +103,7 @@ function ProfileCard({ user }: { user: User }) {
           )}
 
           <Stack direction="row" spacing={1}>
-            <Chip size="small" label={user.role} color={user.role === 'admin' ? 'secondary' : 'default'} />
+            <Chip size="small" label={user.role} color={isAdmin(user) ? 'secondary' : 'default'} />
             <Chip size="small" label={user.status} color={user.status === 'active' ? 'success' : 'default'} />
           </Stack>
 

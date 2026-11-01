@@ -18,7 +18,13 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
 };
 
 export const requireAdmin: RequestHandler = (req, _res, next) => {
-  if (req.auth?.role !== 'admin') throw new HttpError(403, 'Admin access required');
+  const role = req.auth?.role;
+  if (role !== 'admin' && role !== 'superadmin') throw new HttpError(403, 'Admin access required');
+  next();
+};
+
+export const requireSuperAdmin: RequestHandler = (req, _res, next) => {
+  if (req.auth?.role !== 'superadmin') throw new HttpError(403, 'Super admin access required');
   next();
 };
 

@@ -24,6 +24,9 @@ export const api = {
   users: () => request<PublicUser[]>('GET', '/api/users'),
 
   adminUsers: () => request<User[]>('GET', '/api/admin/users'),
+  createGuest: (name: string) => request<User>('POST', '/api/admin/guests', { name }),
+  updateRole: (userId: string, role: 'user' | 'admin') =>
+    request<User>('PUT', `/api/admin/users/${id(userId)}/role`, { role }),
   resetPassword: (userId: string) =>
     request<{ temporaryPassword: string }>('POST', `/api/admin/users/${id(userId)}/reset-password`),
 
