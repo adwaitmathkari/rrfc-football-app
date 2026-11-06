@@ -1,6 +1,12 @@
 node_modules/
 dist/
+dist-lambda/
 target/
+# Terraform: local state holds the generated JWT secrets, never commit it
+.terraform/
+*.tfstate
+*.tfstate.*
+iac/build/
 .env
 .env.*
 !.env.example

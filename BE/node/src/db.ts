@@ -4,7 +4,7 @@ import { config } from './config.js';
 
 const client = new DynamoDBClient({
   region: config.dynamo.region,
-  endpoint: config.dynamo.endpoint,
+  endpoint: config.dynamo.endpoint || undefined,
 });
 
 export const db = DynamoDBDocumentClient.from(client, {

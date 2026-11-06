@@ -24,8 +24,14 @@ public record User(
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_SUPERADMIN = "superadmin";
     public static final String STATUS_ACTIVE = "active";
+    // Deleted users keep their name and stats so past games still show them
+    public static final String STATUS_DELETED = "deleted";
 
     public boolean isActive() {
         return STATUS_ACTIVE.equals(status);
+    }
+
+    public boolean isDeleted() {
+        return STATUS_DELETED.equals(status);
     }
 }

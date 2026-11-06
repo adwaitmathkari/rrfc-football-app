@@ -27,6 +27,7 @@ export const api = {
   createGuest: (name: string) => request<User>('POST', '/api/admin/guests', { name }),
   updateRole: (userId: string, role: 'user' | 'admin') =>
     request<User>('PUT', `/api/admin/users/${id(userId)}/role`, { role }),
+  deleteUser: (userId: string) => request<void>('DELETE', `/api/admin/users/${id(userId)}`),
   resetPassword: (userId: string) =>
     request<{ temporaryPassword: string }>('POST', `/api/admin/users/${id(userId)}/reset-password`),
 

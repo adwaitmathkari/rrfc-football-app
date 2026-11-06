@@ -14,7 +14,8 @@ import { usersRouter } from './routes/users.js';
 export const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: config.corsOrigin, credentials: true }));
+// Empty CORS_ORIGIN (as on AWS, where CloudFront serves FE and API from one domain) disables CORS
+if (config.corsOrigin) app.use(cors({ origin: config.corsOrigin, credentials: true }));
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
 

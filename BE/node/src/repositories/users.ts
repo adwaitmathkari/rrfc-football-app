@@ -10,7 +10,8 @@ import { db, scanAll, tables } from '../db.js';
 import { nowIso } from '../time.js';
 
 export type Role = 'user' | 'admin' | 'superadmin';
-export type UserStatus = 'active' | 'inactive';
+// 'deleted' users keep their name and stats so past games still show them
+export type UserStatus = 'active' | 'inactive' | 'deleted';
 
 export interface User {
   id: string;
@@ -124,6 +125,20 @@ export async function updateRole(id: string, role: Role): Promise<User> {
     }),
   );
   return res.Attributes as User;
+}
+
+/** Removing email/phone/password blocks login and frees them for a new registration. */
+export async function softDeleteUser(id: string): Promise<void> {
+  await db.send(
+    new UpdateCommand({
+      TableName: tables.users,
+      Key: { id },
+      UpdateExpression: 'SET #status = :deleted, updatedAt = :now REMOVE email, phone, passwordHash',
+      ConditionExpression: 'attribute_exists(id)',
+      ExpressionAttributeNames: { '#status': 'status' },
+      ExpressionAttributeValues: { ':deleted': 'deleted', ':now': nowIso() },
+    }),
+  );
 }
 
 export const toSelfDto = (u: User) => ({

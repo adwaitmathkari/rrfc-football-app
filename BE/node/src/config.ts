@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 // npm scripts run from BE/node, and the .env file is shared with the Java backend in BE/.
-dotenv.config({ path: path.resolve(process.cwd(), '../.env'), quiet: true });
+// ENV_FILE points elsewhere, e.g. ENV_FILE=../.env.aws to run the seed script against AWS.
+dotenv.config({ path: process.env.ENV_FILE ?? path.resolve(process.cwd(), '../.env'), quiet: true });
 
 const env = z
   .object({

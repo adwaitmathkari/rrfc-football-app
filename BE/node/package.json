@@ -8,10 +8,12 @@
     "build": "tsc",
     "start": "node dist/src/server.js",
     "typecheck": "tsc --noEmit",
+    "build:lambda": "node scripts/build-lambda.mjs",
     "seed:admin": "tsx scripts/seed-admin.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1161.0",
+    "@aws-sdk/client-ssm": "^3.1161.0",
     "@aws-sdk/lib-dynamodb": "^3.1161.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -21,6 +23,7 @@
     "express-rate-limit": "^8.7.2",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
+    "serverless-http": "^4.0.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -29,6 +32,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }

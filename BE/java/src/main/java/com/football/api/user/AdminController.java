@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,6 +59,7 @@ public class AdminController {
     @GetMapping("/users")
     public List<UserDto> listUsers() {
         return users.findAll().stream()
+                .filter(u -> !u.isDeleted())
                 .sorted(Comparator.comparing(User::name, String.CASE_INSENSITIVE_ORDER))
                 .map(UserDto::from)
                 .toList();
@@ -76,7 +78,7 @@ public class AdminController {
     @PostMapping("/users/{id}/reset-password")
     @PreAuthorize("hasRole('SUPERADMIN')")
     public TemporaryPasswordResponse resetPassword(@PathVariable String id) {
-        User user = users.findById(id).orElseThrow(() -> ApiException.notFound("User not found"));
+        User user = findExisting(id);
         if (user.guest()) {
             throw ApiException.badRequest("Guest players cannot log in");
         }
@@ -91,7 +93,7 @@ public class AdminController {
     @PreAuthorize("hasRole('SUPERADMIN')")
     public UserDto updateRole(@AuthenticationPrincipal AuthUser me, @PathVariable String id,
             @Valid @RequestBody UpdateRoleRequest body) {
-        User user = users.findById(id).orElseThrow(() -> ApiException.notFound("User not found"));
+        User user = findExisting(id);
         if (user.id().equals(me.userId())) {
             throw ApiException.badRequest("You cannot change your own role");
         }
@@ -102,5 +104,25 @@ public class AdminController {
             throw ApiException.badRequest("A super admin's role cannot be changed");
         }
         return UserDto.from(users.updateRole(user.id(), body.role()));
+    }
+
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@AuthenticationPrincipal AuthUser me, @PathVariable String id) {
+        User user = findExisting(id);
+        if (user.id().equals(me.userId())) {
+            throw ApiException.badRequest("You cannot delete yourself");
+        }
+        if (User.ROLE_SUPERADMIN.equals(user.role())) {
+            throw ApiException.badRequest("A super admin cannot be deleted");
+        }
+        users.softDelete(user.id());
+    }
+
+    private User findExisting(String id) {
+        return users.findById(id)
+                .filter(u -> !u.isDeleted())
+                .orElseThrow(() -> ApiException.notFound("User not found"));
     }
 }

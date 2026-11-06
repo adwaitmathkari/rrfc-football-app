@@ -41,6 +41,18 @@ export function AdminUsersCard() {
   const [result, setResult] = useState<{ user: User; password: string } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [addingGuest, setAddingGuest] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+
+  const remove = async (user: User) => {
+    setDeletingUser(null);
+    setActionError(null);
+    try {
+      await api.deleteUser(user.id);
+      await reload();
+    } catch (err) {
+      setActionError(errorMessage(err));
+    }
+  };
 
   const reset = async (user: User) => {
     setConfirmUser(null);
@@ -107,10 +119,15 @@ export function AdminUsersCard() {
                     <TableCell>
                       <Chip size="small" label={u.status} color={u.status === 'active' ? 'success' : 'default'} />
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                       {superAdmin && !u.guest && (
                         <Button size="small" onClick={() => setConfirmUser(u)}>
                           Reset password
+                        </Button>
+                      )}
+                      {superAdmin && u.role !== 'superadmin' && u.id !== me?.id && (
+                        <Button size="small" color="error" onClick={() => setDeletingUser(u)}>
+                          Delete
                         </Button>
                       )}
                     </TableCell>
@@ -133,6 +150,22 @@ export function AdminUsersCard() {
           <Button onClick={() => setConfirmUser(null)}>Cancel</Button>
           <Button variant="contained" color="warning" onClick={() => confirmUser && void reset(confirmUser)}>
             Reset
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deletingUser !== null} onClose={() => setDeletingUser(null)}>
+        <DialogTitle>Delete {deletingUser?.name}?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            They will no longer be able to log in and will disappear from player lists and stats. Their name stays on
+            past games. Their email and phone number can be used to register again.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeletingUser(null)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={() => deletingUser && void remove(deletingUser)}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

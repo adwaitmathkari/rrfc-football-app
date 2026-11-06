@@ -126,6 +126,18 @@ public class UserRepository {
         return fromItem(response.attributes());
     }
 
+    /** Removing email/phone/password blocks login and frees them for a new registration. */
+    public void softDelete(String id) {
+        db.updateItem(r -> r.tableName(table)
+                .key(key(id))
+                .updateExpression("SET #status = :deleted, updatedAt = :now REMOVE email, phone, passwordHash")
+                .conditionExpression("attribute_exists(id)")
+                .expressionAttributeNames(Map.of("#status", "status"))
+                .expressionAttributeValues(Map.of(
+                        ":deleted", s(User.STATUS_DELETED),
+                        ":now", s(Times.nowIso()))));
+    }
+
     static Map<String, AttributeValue> toItem(User u) {
         Map<String, AttributeValue> item = new HashMap<>();
         item.put("id", s(u.id()));
