@@ -64,7 +64,6 @@ export const gameSchema = z
     score: z.object({ team1: goals, team2: goals }).nullable().optional(),
   })
   .refine((g) => g.timeTo > g.timeFrom, { message: 'must be after timeFrom', path: ['timeTo'] })
-  .refine((g) => g.team1.length === g.team2.length, { message: 'teams must be the same size', path: ['team2'] })
   .refine((g) => new Set([...g.team1, ...g.team2]).size === g.team1.length + g.team2.length, {
     message: 'a player can only be picked once',
     path: ['team1'],

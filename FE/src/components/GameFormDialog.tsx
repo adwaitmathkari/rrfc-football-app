@@ -67,7 +67,7 @@ export function GameFormDialog({ game, users, onClose, onSaved }: Props) {
   const problems: string[] = [];
   if (selected.length < 2) problems.push('Select at least 2 players.');
   if (unassigned > 0) problems.push('Assign every selected player to Blue or White.');
-  if (blue.length !== white.length) problems.push('Teams must be the same size.');
+  if (unassigned === 0 && (blue.length === 0 || white.length === 0)) problems.push('Each team needs at least 1 player.');
   if (timeFrom && timeTo && timeTo <= timeFrom) problems.push('End time must be after start time.');
   if (hasScore && (scoreBlue === '' || scoreWhite === '')) problems.push('Enter both scores or neither.');
 

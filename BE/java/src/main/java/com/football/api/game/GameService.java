@@ -115,9 +115,6 @@ public class GameService {
         if (req.timeTo().compareTo(req.timeFrom()) <= 0) {
             throw ApiException.badRequest("timeTo: must be after timeFrom");
         }
-        if (req.team1().size() != req.team2().size()) {
-            throw ApiException.badRequest("team2: teams must be the same size");
-        }
         var unique = new HashSet<>(req.team1());
         unique.addAll(req.team2());
         if (unique.size() != req.team1().size() + req.team2().size()) {
